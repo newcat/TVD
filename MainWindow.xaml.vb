@@ -334,7 +334,7 @@ Class MainWindow
             End If
 
         Catch e As Exception
-            addEventLineSub(cEvent.err, "Error changing mode:" + e.Message)
+            'addEventLineSub(cEvent.err, "Error changing mode:" + e.Message)
         End Try
 
     End Sub
