@@ -231,7 +231,7 @@ Class MainWindow
             color = getColorByUsername(username)
         End If
 
-        listEvents.Add(New cEvent With {.EventType = eventType, .text = text, .username = displayName, .color = color, .isMod = getUserByName(username).isMod})
+        listEvents.Add(New cEvent With {.EventType = eventType, .text = text, .username = displayName, .color = color, .isMod = getUserByName(username).isMod, .eventID = listEvents.ToArray.Length + 1})
 
         eventList.ItemsSource = listEvents
         eventList.ScrollIntoView(eventList.Items.GetItemAt(eventList.Items.Count - 1))
@@ -580,6 +580,7 @@ Public Structure cEvent
     Private _text As String
     Private _color As String
     Private _isMod As Boolean
+    Private _eventID As UInteger
 
     Property EventType() As Integer
         Get
@@ -623,6 +624,15 @@ Public Structure cEvent
         End Get
         Set(ByVal value As Boolean)
             _isMod = value
+        End Set
+    End Property
+
+    Property eventID() As UInteger
+        Get
+            Return _eventID
+        End Get
+        Set(value As UInteger)
+            _eventID = value
         End Set
     End Property
 
