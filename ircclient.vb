@@ -32,15 +32,15 @@ Public Class ircclient
 
     Public Sub send(ByVal msg As String)
 
-        'If (msg.StartsWith("/")) Then
+        If (msg.StartsWith("%"c)) Then
 
-        '    client_send(msg.Trim("/"))
+            client_send(msg.Trim("%"c))
 
-        'Else
+        Else
 
-        client_send("PRIVMSG #" & My.Settings.channel & " :" & msg)
+            client_send("PRIVMSG #" & My.Settings.channel & " :" & msg)
 
-        'End If
+        End If
 
     End Sub
 
@@ -101,6 +101,10 @@ Public Class ircclient
             ElseIf client_receive.Contains("PART") Then
                 RaiseEvent part(getNickname(client_receive))
             ElseIf client_receive.Contains("376 " + My.Settings.nick.ToLower) Then
+                RaiseEvent cmdmsgReceived(client_receive)
+                client_send("CAP REQ :twitch.tv/membership")
+            ElseIf client_receive.Contains("CAP * ACK :twitch.tv/membership") Then
+                RaiseEvent cmdmsgReceived(client_receive)
                 client_send("JOIN #" & My.Settings.channel)
             ElseIf client_receive.Contains("353") Then
                 RaiseEvent cmdmsgReceived(client_receive)

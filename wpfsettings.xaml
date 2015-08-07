@@ -39,7 +39,7 @@
                 </VisualStateManager.VisualStateGroups>
                 <ContentPresenter RecognizesAccessKey="True" />
                 <Border BorderBrush="White" BorderThickness="1" CornerRadius="2" x:Name="btnborder"/>
-                <Label x:Name="btnlabel" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" Content="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" Foreground="White"/>
+                <Label x:Name="btnlabel" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" Content="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" Foreground="White" Margin="0,-2.5,0,0"/>
                 <Grid.Background>
                     <SolidColorBrush />
                 </Grid.Background>

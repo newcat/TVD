@@ -8,20 +8,17 @@
 
     <Window.Resources>
 
-        <LinearGradientBrush
-            x:Key="errBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+        <LinearGradientBrush x:Key="errBrush" EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Offset="0" Color="Red" />
             <GradientStop Offset="1" Color="#FFD20000" />
         </LinearGradientBrush>
 
-        <LinearGradientBrush
-            x:Key="joinBrush" EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.6">
+        <LinearGradientBrush x:Key="joinBrush" EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.6">
             <GradientStop Offset="0" Color="#B400B700" />
             <GradientStop Offset="1" Color="#B4007C00" />
         </LinearGradientBrush>
 
-        <LinearGradientBrush
-            x:Key="partBrush" EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.6">
+        <LinearGradientBrush x:Key="partBrush" EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.6">
             <GradientStop Offset="0" Color="#B4B70000" />
             <GradientStop Offset="1" Color="#B47C0000" />
         </LinearGradientBrush>
@@ -332,6 +329,41 @@
             </Setter>
         </Style>
 
+        <ControlTemplate x:Key="btn">
+            <Grid x:Name="btnGrid">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <Storyboard>
+                                <ColorAnimation From="#40FFFFFF" To="Transparent" Duration="00:00:00.1000000"
+                                                    Storyboard.TargetName="btnGrid" Storyboard.TargetProperty="(Panel.Background).Color"/>
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState x:Name="MouseOver">
+                            <Storyboard>
+                                <ColorAnimation From="Transparent" To="#40FFFFFF" Duration="00:00:00.1000000"
+                                                    Storyboard.TargetName="btnGrid" Storyboard.TargetProperty="(Panel.Background).Color"/>
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState x:Name="Disabled">
+                            <Storyboard>
+                                <ColorAnimation To="Gray" Duration="00:00:00.1000000"
+                                                Storyboard.TargetName="btnlabel" Storyboard.TargetProperty="Foreground.Color" />
+                                <ColorAnimation To="Gray" Duration="00:00:00.1000000"
+                                                Storyboard.TargetName="btnborder" Storyboard.TargetProperty="BorderBrush.Color" />
+                            </Storyboard>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+                <ContentPresenter RecognizesAccessKey="True" />
+                <Border BorderBrush="White" BorderThickness="1" CornerRadius="2" x:Name="btnborder"/>
+                <Label x:Name="btnlabel" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" Content="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" Foreground="White" Margin="0,-2.5,0,0"/>
+                <Grid.Background>
+                    <SolidColorBrush />
+                </Grid.Background>
+            </Grid>
+        </ControlTemplate>
+
     </Window.Resources>
 
     <Window.Background>
@@ -579,6 +611,24 @@
 
         <!-- Green: #46FF00 | Red: #FF0000 | Yellow: #FFE800 -->
         <Label x:Name="spLabel" Content="SpamProtector inactive" Margin="0,118,75,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="177" Foreground="#FF0000" HorizontalContentAlignment="Right" />
+
+        <!--
+        <Button x:Name="btnChatBigger" Content="+" Margin="234,124,0,0" Width="20" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="Template" Value="{StaticResource btn}" />
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <Button x:Name="btnChatSmaller" Content="-" Margin="261,124,0,0" Width="20" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="Template" Value="{StaticResource btn}" />
+                </Style>
+            </Button.Style>
+        </Button>
+        -->
 
     </Grid>
 </Window>

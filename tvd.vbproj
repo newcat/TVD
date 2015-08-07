@@ -85,10 +85,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="autoupdater.vb" />
+    <Compile Include="cEvent.vb" />
     <Compile Include="Graph.vb" />
     <Compile Include="ircclient.vb" />
     <Compile Include="SpamProtector.vb" />
     <Compile Include="TwitchColors.vb" />
+    <Compile Include="User.vb" />
     <Compile Include="wpfsettings.xaml.vb">
       <DependentUpon>wpfsettings.xaml</DependentUpon>
     </Compile>

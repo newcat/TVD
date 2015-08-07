@@ -5,14 +5,12 @@ Imports System.Windows.Threading
 Imports System.Text.RegularExpressions
 Imports System.Collections.ObjectModel
 Imports System.Windows.Media.Animation
-Imports System.Web.Script.Serialization
-Imports System.ComponentModel
-Imports System.Runtime.CompilerServices
 
 Class MainWindow
 
     Dim viewerCount As Integer = 0
     Dim suppressUpdate As Boolean = False
+    Dim chatSize As Double = 20.0
 
     Dim viewerList As New ObservableCollection(Of User)
     Dim listEvents As New ObservableCollection(Of cEvent)
@@ -49,7 +47,7 @@ Class MainWindow
         twitchColors = New TwitchColors
         twitchColors.initializeColors()
 
-        graph = New Graph(lbl0, lbl20, lbl40, lbl60, lbl80, LinePath, FillPath, ViewerDiagramm.ActualWidth)
+        graph = New Graph(lbl0, lbl20, lbl40, lbl60, lbl80, LinePath, FillPath, CInt(ViewerDiagramm.ActualWidth))
 
         followerTimer.Interval = New System.TimeSpan(0, 0, 20)
         followerTimer.Start()
@@ -58,6 +56,7 @@ Class MainWindow
         graphTimer.Start()
 
         DataContext = listEvents
+        eventList.DataContext = Me
 
         addEventLineSub(cEvent.IRC, "Connecting to TwitchIRC")
 
@@ -231,7 +230,7 @@ Class MainWindow
             color = getColorByUsername(username)
         End If
 
-        listEvents.Add(New cEvent With {.EventType = eventType, .text = text, .username = displayName, .color = color, .isMod = getUserByName(username).isMod, .eventID = listEvents.ToArray.Length + 1})
+        listEvents.Add(New cEvent With {.EventType = eventType, .text = text, .username = displayName, .color = color, .isMod = getUserByName(username).isMod, .eventID = CUInt(listEvents.ToArray.Length + 1)})
 
         eventList.ItemsSource = listEvents
         eventList.ScrollIntoView(eventList.Items.GetItemAt(eventList.Items.Count - 1))
@@ -378,15 +377,15 @@ Class MainWindow
         Environment.Exit(0)
     End Sub
 
-    Private Sub graphTimerTick() Handles graphTimer.Tick
+    Private Async Function graphTimerTick() As Task Handles graphTimer.Tick
 
         If Not suppressUpdate Then
-            graph.addStop(CInt(Val(vc.Content)))
+            Await graph.addStop(CInt(Val(vc.Content)))
         Else
             suppressUpdate = False
         End If
 
-    End Sub
+    End Function
 
     Private Sub viewersLB_SelectionChanged(ByVal sender As System.Object, ByVal e As System.Windows.Controls.SelectionChangedEventArgs) Handles viewersLB.SelectionChanged
         viewersLB.SelectedIndex = -1
@@ -399,7 +398,7 @@ Class MainWindow
     Private Async Sub Window_SizeChanged(ByVal sender As System.Object, ByVal e As System.Windows.SizeChangedEventArgs) Handles MyBase.SizeChanged
 
         suppressUpdate = True
-        If Not IsNothing(graph) Then Await graph.setVdWidth(ViewerDiagramm.ActualWidth)
+        If Not IsNothing(graph) Then Await graph.setVdWidth(CInt(ViewerDiagramm.ActualWidth))
 
     End Sub
 
@@ -514,7 +513,7 @@ Class MainWindow
                 Canvas.SetLeft(InfoPanel, 0)
             End If
 
-            Dim y As Integer = graph.getYbyX(x)
+            Dim y As Integer = CInt(graph.getYbyX(x))
 
             If y > 60 Then
                 Canvas.SetTop(InfoPanel, y - 60)
@@ -565,161 +564,18 @@ Class MainWindow
 
     End Sub
 
-End Class
+    'Private Sub increaseChatSize() Handles btnChatBigger.Click
+    '    chatSize += 4.0
+    '    applyChatSize()
+    'End Sub
 
-Public Structure cEvent
+    'Private Sub decreaseChatSize() Handles btnChatSmaller.Click
+    '    chatSize -= 4.0
+    '    applyChatSize()
+    'End Sub
 
-    Public Const err As Integer = 0
-    Public Const IRC As Integer = 1
-    Public Const Join As Integer = 2
-    Public Const Part As Integer = 3
-    Public Const Chat As Integer = 4
+    'Private Sub applyChatSize()
+    '    eventList.ItemContainerStyle.Setters.Add(New Setter(HeightProperty, chatSize))
+    'End Sub
 
-    Private _EventType As Integer
-    Private _username As String
-    Private _text As String
-    Private _color As String
-    Private _isMod As Boolean
-    Private _eventID As UInteger
-
-    Property EventType() As Integer
-        Get
-            Return _EventType
-        End Get
-        Set(ByVal value As Integer)
-            _EventType = value
-        End Set
-    End Property
-
-    Property username() As String
-        Get
-            Return _username
-        End Get
-        Set(ByVal value As String)
-            _username = value
-        End Set
-    End Property
-
-    Property text() As String
-        Get
-            Return _text
-        End Get
-        Set(ByVal value As String)
-            _text = value
-        End Set
-    End Property
-
-    Property color() As String
-        Get
-            Return _color
-        End Get
-        Set(ByVal value As String)
-            _color = value
-        End Set
-    End Property
-
-    Property isMod() As Boolean
-        Get
-            Return _isMod
-        End Get
-        Set(ByVal value As Boolean)
-            _isMod = value
-        End Set
-    End Property
-
-    Property eventID() As UInteger
-        Get
-            Return _eventID
-        End Get
-        Set(value As UInteger)
-            _eventID = value
-        End Set
-    End Property
-
-End Structure
-
-Public Class User
-    Implements System.ComponentModel.INotifyPropertyChanged
-
-    Private _color As Color
-    Private _name As String
-    Private _isMod As Boolean
-    Private _displayName As String
-    Public needsUpdate As Boolean
-
-    Property color() As Color
-        Get
-            Return _color
-        End Get
-        Set(ByVal value As Color)
-            _color = value
-            RaiseEvent PropertyChanged(Me, New PropertyChangedEventArgs("color"))
-        End Set
-    End Property
-
-    Property name() As String
-        Get
-            Return _name
-        End Get
-        Set(ByVal value As String)
-            _name = value
-            RaiseEvent PropertyChanged(Me, New PropertyChangedEventArgs("name"))
-        End Set
-    End Property
-
-    Property isMod() As Boolean
-        Get
-            Return _isMod
-        End Get
-        Set(ByVal value As Boolean)
-            _isMod = value
-            RaiseEvent PropertyChanged(Me, New PropertyChangedEventArgs("isMod"))
-        End Set
-    End Property
-
-    Property displayName() As String
-        Get
-            If Not IsNothing(_displayName) Then
-                Return _displayName
-            Else
-                Return _name
-            End If
-        End Get
-        Set(value As String)
-            _displayName = value
-            RaiseEvent PropertyChanged(Me, New PropertyChangedEventArgs("displayName"))
-        End Set
-    End Property
-
-    Public Sub New(ByVal name As String, ByVal isMod As Boolean)
-
-        _name = name
-        _isMod = isMod
-
-        Dim tc As New TwitchColors()
-        tc.initializeColors()
-
-        _color = tc.getColorByUsername(_name)
-
-        tc.Dispose()
-
-        If Not _name = "404" Then getDisplayName()
-
-    End Sub
-
-    Private Async Sub getDisplayName()
-
-        Dim wr As New System.Net.WebClient
-        Dim json As String
-
-        json = Await wr.DownloadStringTaskAsync("https://api.twitch.tv/kraken/users/" + _name)
-
-        Dim jsonSerializer As New JavaScriptSerializer
-        Dim dict As Dictionary(Of String, Object) = jsonSerializer.Deserialize(Of Dictionary(Of String, Object))(json)
-
-        displayName = CStr(dict("display_name"))
-
-    End Sub
-
-    Public Event PropertyChanged(sender As Object, e As ComponentModel.PropertyChangedEventArgs) Implements ComponentModel.INotifyPropertyChanged.PropertyChanged
 End Class
