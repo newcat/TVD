@@ -13,19 +13,13 @@ Public Class autoupdater
             My.Computer.FileSystem.DeleteFile(cDir + "\updater.exe")
         End If
 
-        Dim localVersion As String = ""
-
-        If My.Computer.FileSystem.FileExists(cDir + "\version") Then
-            localVersion = My.Computer.FileSystem.ReadAllText(cDir + "\version")
-        End If
+        Dim localVersion As String = GetType(Application).Assembly.GetName().Version.ToString()
 
         Dim cl As New HttpClient
         Dim newestVersion As String = Await cl.GetStringAsync(New Uri("http://newcat.bplaced.net/tvd/version"))
 
         If localVersion <> newestVersion Then
-
             updateFound()
-
         End If
 
     End Sub
@@ -33,13 +27,7 @@ Public Class autoupdater
     Private Sub updateFound()
 
         If MsgBox("Update found! Download now?", MsgBoxStyle.YesNo, "TVD Updater") = MsgBoxResult.Yes Then
-
-            My.Computer.Network.DownloadFile("http://newcat.bplaced.net/tvd/updater.exe", cDir + "\updater.exe", "", "", True, 5000, True)
-
-            Process.Start(My.Computer.FileSystem.CurrentDirectory + "\updater.exe")
-
-            End
-
+            Process.Start("http://newcat.bplaced.net/tvd/tvd.exe")
         End If
 
     End Sub

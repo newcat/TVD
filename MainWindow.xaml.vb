@@ -461,26 +461,26 @@ Class MainWindow
 
     End Sub
 
-    Private Function getUsernameByContextMenu(ByVal cm As System.Windows.Controls.MenuItem) As String
-        Dim contextMenu As System.Windows.Controls.ContextMenu = CType(cm.Parent, System.Windows.Controls.ContextMenu)
-        Dim lblUsername As System.Windows.Controls.TextBlock = CType(contextMenu.PlacementTarget, System.Windows.Controls.TextBlock)
+    Private Function getUsernameByContextMenu(ByVal cm As MenuItem) As String
+        Dim contextMenu As ContextMenu = CType(cm.Parent, ContextMenu)
+        Dim lblUsername As TextBlock = CType(contextMenu.PlacementTarget, TextBlock)
         Return lblUsername.Text
     End Function
 
-    Private Sub initCM(ByVal sender As System.Object, ByVal e As RoutedEventArgs)
-        Dim cm As System.Windows.Controls.ContextMenu = CType(sender, System.Windows.Controls.ContextMenu)
-        Dim lblUsername As System.Windows.Controls.TextBlock = CType(cm.PlacementTarget, System.Windows.Controls.TextBlock)
+    Private Sub initCM(ByVal sender As Object, ByVal e As RoutedEventArgs)
+        Dim cm As ContextMenu = CType(sender, ContextMenu)
+        Dim lblUsername As TextBlock = CType(cm.PlacementTarget, TextBlock)
         Dim username As String = lblUsername.Text
         Dim user As User = getUserByName(username)
         Dim ircUser As User = getUserByName(My.Settings.nick)
 
-        cm.Items(0).IsEnabled = ircUser.isMod
-        cm.Items(2).IsEnabled = ircUser.isMod And Not user.isMod
-        cm.Items(3).IsEnabled = ircUser.isMod And user.isMod
+        CType(cm.Items.GetItemAt(0), MenuItem).IsEnabled = ircUser.isMod
+        CType(cm.Items.GetItemAt(2), MenuItem).IsEnabled = ircUser.isMod And Not user.isMod
+        CType(cm.Items.GetItemAt(3), MenuItem).IsEnabled = ircUser.isMod And user.isMod
 
     End Sub
 
-    Private Sub ViewerDiagramm_MouseLeave(ByVal sender As System.Object, ByVal e As System.Windows.Input.MouseEventArgs) Handles ViewerDiagramm.MouseLeave
+    Private Sub ViewerDiagramm_MouseLeave(ByVal sender As Object, ByVal e As MouseEventArgs) Handles ViewerDiagramm.MouseLeave
 
         Dim fadeOut As New DoubleAnimation(0, TimeSpan.FromSeconds(0.5))
         InfoPanel.BeginAnimation(OpacityProperty, fadeOut)
@@ -488,7 +488,7 @@ Class MainWindow
 
     End Sub
 
-    Private Sub ViewerDiagramm_MouseMove(ByVal sender As System.Object, ByVal e As System.Windows.Input.MouseEventArgs) Handles ViewerDiagramm.MouseMove
+    Private Sub ViewerDiagramm_MouseMove(ByVal sender As Object, ByVal e As MouseEventArgs) Handles ViewerDiagramm.MouseMove
 
         If IsNothing(graph) Then Return
 
