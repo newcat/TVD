@@ -7,6 +7,7 @@ Imports System.Net.Sockets
 Imports System.Net
 
 Public Class ircclient
+    Implements IDisposable
 
     Dim tcps As NetworkStream
     Dim tcpw As StreamWriter
@@ -45,9 +46,14 @@ Public Class ircclient
     End Sub
 
 
-    Public Sub connect()
+    Public Async Function connect() As Task
 
-        tcpc.Connect(ip, port)
+        Try
+            Await tcpc.ConnectAsync(ip, port)
+        Catch e As SocketException
+            RaiseEvent connectionError()
+            Return
+        End Try
 
         If tcpc.Connected Then
 
@@ -69,7 +75,7 @@ Public Class ircclient
         client_send("PASS " & My.Settings.oauth)
         client_send("NICK " & My.Settings.nick)
 
-    End Sub
+    End Function
 
     Private Sub client_send(ByVal text As String)
         If tcpc.Connected Then
@@ -171,5 +177,38 @@ Public Class ircclient
         tcpc.Close()
 
     End Sub
+
+#Region "IDisposable Support"
+    Private disposedValue As Boolean ' Dient zur Erkennung redundanter Aufrufe.
+
+    ' IDisposable
+    Protected Overridable Sub Dispose(disposing As Boolean)
+        If Not disposedValue Then
+            If disposing Then
+                ' TODO: verwalteten Zustand (verwaltete Objekte) entsorgen.
+                tcpc.Close()
+            End If
+
+            ' TODO: nicht verwaltete Ressourcen (nicht verwaltete Objekte) freigeben und Finalize() weiter unten überschreiben.
+            ' TODO: große Felder auf Null setzen.
+        End If
+        disposedValue = True
+    End Sub
+
+    ' TODO: Finalize() nur überschreiben, wenn Dispose(disposing As Boolean) weiter oben Code zur Bereinigung nicht verwalteter Ressourcen enthält.
+    'Protected Overrides Sub Finalize()
+    '    ' Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in Dispose(disposing As Boolean) weiter oben ein.
+    '    Dispose(False)
+    '    MyBase.Finalize()
+    'End Sub
+
+    ' Dieser Code wird von Visual Basic hinzugefügt, um das Dispose-Muster richtig zu implementieren.
+    Public Sub Dispose() Implements IDisposable.Dispose
+        ' Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in Dispose(disposing As Boolean) weiter oben ein.
+        Dispose(True)
+        ' TODO: Auskommentierung der folgenden Zeile aufheben, wenn Finalize() oben überschrieben wird.
+        ' GC.SuppressFinalize(Me)
+    End Sub
+#End Region
 
 End Class

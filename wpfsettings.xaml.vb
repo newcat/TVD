@@ -9,7 +9,7 @@ Public Class wpfsettings
 
 
     Private Sub btnOK_Click(ByVal sender As System.Object, ByVal e As System.Windows.RoutedEventArgs) Handles btnOK.Click
-        If tbNick.Text = "" Or tbOauth.Text = "" Or tbChannel.Text = "" Or tbOauth.Text.Substring(0, 6) <> "oauth:" Then
+        If tbNick.Text = "" OrElse tbOauth.Text = "" OrElse tbChannel.Text = "" OrElse tbOauth.Text.Substring(0, 6) <> "oauth:" Then
 
             MsgBox("Invalid input!")
             Return

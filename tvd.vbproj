@@ -63,6 +63,7 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Expression.Drawing, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
@@ -86,6 +87,8 @@
     </ApplicationDefinition>
     <Compile Include="autoupdater.vb" />
     <Compile Include="cEvent.vb" />
+    <Compile Include="followerNonfollowerGraph.vb" />
+    <Compile Include="GlobalSuppressions.vb" />
     <Compile Include="Graph.vb" />
     <Compile Include="ircclient.vb" />
     <Compile Include="SpamProtector.vb" />
@@ -163,6 +166,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="changelog.txt" />
     <Content Include="Resources\followers.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -1,0 +1,5 @@
+﻿2.1:
+	* Design improvements
+	* Bugfixes
+	+ Added option to change text size in chat
+	+ Follower / Non-Follower graph

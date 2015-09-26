@@ -8,24 +8,28 @@ Imports System.Windows.Media.Animation
 
 Class MainWindow
 
-    Dim viewerCount As Integer = 0
-    Dim suppressUpdate As Boolean = False
-    Dim chatSize As Double = 20.0
+    'wc.Headers.Add("Client-ID", "3rxdy8dzlvpysys8fjfle0qqab77aqq")
 
-    Dim viewerList As New ObservableCollection(Of User)
-    Dim listEvents As New ObservableCollection(Of cEvent)
+    Private viewerCount As Integer = 0
+    Private suppressUpdate As Boolean = False
 
-    WithEvents backgroundWorker As New System.ComponentModel.BackgroundWorker
-    WithEvents followerTimer As New DispatcherTimer
-    WithEvents graphTimer As New DispatcherTimer
+    Private chatSize As Integer = 9
 
-    Dim autoupdater As New autoupdater
-    WithEvents ircclient As New ircclient
-    Dim twitchColors As TwitchColors
-    Dim spamProtector As New SpamProtector
-    Dim graph As Graph
+    Private viewerList As New ObservableCollection(Of User)
+    Private listEvents As New ObservableCollection(Of cEvent)
 
-    Private Sub Window_Loaded(ByVal sender As System.Object, ByVal e As System.Windows.RoutedEventArgs) Handles MyBase.Loaded
+    Private WithEvents backgroundWorker As New System.ComponentModel.BackgroundWorker
+    Private WithEvents followerTimer As New DispatcherTimer
+    Private WithEvents graphTimer As New DispatcherTimer
+
+    Private autoupdater As New autoupdater
+    Private WithEvents ircclient As New ircclient
+    Private twitchColors As TwitchColors
+    Private spamProtector As New SpamProtector
+    Private graph As Graph
+    Private fnfg As followerNonfollowerGraph
+
+    Private Async Sub Window_Loaded(ByVal sender As System.Object, ByVal e As System.Windows.RoutedEventArgs) Handles MyBase.Loaded
 
         If Not My.Application.Info.DirectoryPath.Contains("Debug") Then
             autoupdater.check()
@@ -34,15 +38,18 @@ Class MainWindow
         If My.Settings.nick = "" Then
             Dim settings As New WpfSettings
             settings.btnCancel.IsEnabled = False
+            settings.Owner = Me
             settings.ShowDialog()
         Else
             My.Settings.Reload()
         End If
 
         If My.Settings.nick = Nothing Then
-            Me.Close()
+            Close()
             End
         End If
+
+        chatSize = 12
 
         twitchColors = New TwitchColors
         twitchColors.initializeColors()
@@ -55,19 +62,18 @@ Class MainWindow
         graphTimer.Interval = New System.TimeSpan(0, 0, 1)
         graphTimer.Start()
 
-        DataContext = listEvents
-        eventList.DataContext = Me
-
         addEventLineSub(cEvent.IRC, "Connecting to TwitchIRC")
 
-        ircclient.connect()
+        Await ircclient.connect()
         backgroundWorker.RunWorkerAsync()
 
-        loadPhrasesHelperSub()
+        Await loadPhrasesHelperSub()
+
+        fnfg = New followerNonfollowerGraph(arcFollower, arcNonfollower, arcUnknown, fnfgInfoPanel, lblFnfg, viewerList)
 
     End Sub
 
-    Private Async Sub loadPhrasesHelperSub()
+    Private Async Function loadPhrasesHelperSub() As Task
 
         Dim ellipseFillBrush As New RadialGradientBrush(Color.FromRgb(255, 230, 0), Color.FromRgb(220, 200, 0))
         spEllipse.Fill = ellipseFillBrush
@@ -96,7 +102,7 @@ Class MainWindow
         End If
 
 
-    End Sub
+    End Function
 
     Private Sub Timer1_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles followerTimer.Tick
 
@@ -112,7 +118,7 @@ Class MainWindow
 
     End Sub
 
-    Sub getFollowers()
+    Private Sub getFollowers()
 
         Dim webClient As New System.Net.WebClient
         Dim result As String
@@ -156,8 +162,8 @@ Class MainWindow
 
                 Dim storyboard As New Storyboard
                 storyboard.Children.Add(colorAnim)
-                storyboard.SetTargetName(colorAnim, vc.Name)
-                storyboard.SetTargetProperty(colorAnim, New System.Windows.PropertyPath("(Label.Foreground).(SolidColorBrush.Color)"))
+                Storyboard.SetTargetName(colorAnim, vc.Name)
+                Storyboard.SetTargetProperty(colorAnim, New System.Windows.PropertyPath("(Label.Foreground).(SolidColorBrush.Color)"))
 
                 storyboard.Begin(Me)
 
@@ -181,8 +187,8 @@ Class MainWindow
 
                 Dim storyboard As New Storyboard
                 storyboard.Children.Add(colorAnim)
-                storyboard.SetTargetName(colorAnim, fc.Name)
-                storyboard.SetTargetProperty(colorAnim, New System.Windows.PropertyPath("(Label.Foreground).(SolidColorBrush.Color)"))
+                Storyboard.SetTargetName(colorAnim, fc.Name)
+                Storyboard.SetTargetProperty(colorAnim, New System.Windows.PropertyPath("(Label.Foreground).(SolidColorBrush.Color)"))
 
                 storyboard.Begin(Me)
 
@@ -306,19 +312,19 @@ Class MainWindow
 
     End Sub
 
-    Public Sub addUserInit(ByVal username As String) Handles ircclient.initJoin
+    Private Sub addUserInit(ByVal username As String) Handles ircclient.initJoin
 
         addUserSub(New User(username, False))
 
     End Sub
 
-    Public Sub finalizeInit() Handles ircclient.initCompleted
+    Private Sub finalizeInit() Handles ircclient.initCompleted
 
         setViewersSub(viewerList.ToArray.Length.ToString)
 
     End Sub
 
-    Public Sub modeChanged(ByVal username As String, ByVal isMod As Boolean) Handles ircclient.modeChanged
+    Private Sub modeChanged(ByVal username As String, ByVal isMod As Boolean) Handles ircclient.modeChanged
 
         Try
             Dim user As User = viewerList.Item(viewerList.IndexOf(getUserByName(username)))
@@ -339,20 +345,21 @@ Class MainWindow
     End Sub
 #End Region
 
-    Private Sub settings(ByVal sender As System.Object, ByVal e As System.Windows.Input.MouseButtonEventArgs) Handles Image1.MouseDown
+    Private Async Sub settings(ByVal sender As System.Object, ByVal e As System.Windows.Input.MouseButtonEventArgs) Handles Image1.MouseDown
         Dim settings As New WpfSettings
+        settings.Owner = Me
         settings.ShowDialog()
         If settings.DialogResult Then
 
             viewerCount = 0
-            vc.Content = "0"
+            vc.Content = "-"
             listEvents.Clear()
             viewerList.Clear()
             graph.reset()
 
             ircclient.disconnect()
             ircclient = New ircclient
-            ircclient.connect()
+            Await ircclient.connect()
 
         End If
     End Sub
@@ -377,7 +384,7 @@ Class MainWindow
         Environment.Exit(0)
     End Sub
 
-    Private Async Function graphTimerTick() As Task Handles graphTimer.Tick
+    Private Async Sub graphTimerTick() Handles graphTimer.Tick
 
         If Not suppressUpdate Then
             Await graph.addStop(CInt(Val(vc.Content)))
@@ -385,7 +392,7 @@ Class MainWindow
             suppressUpdate = False
         End If
 
-    End Function
+    End Sub
 
     Private Sub viewersLB_SelectionChanged(ByVal sender As System.Object, ByVal e As System.Windows.Controls.SelectionChangedEventArgs) Handles viewersLB.SelectionChanged
         viewersLB.SelectedIndex = -1
@@ -517,8 +524,14 @@ Class MainWindow
 
             If y > 60 Then
                 Canvas.SetTop(InfoPanel, y - 60)
+                InfoPanel.Clip = Geometry.Parse("M0,40 L40,40 L50,50 L60,40 L100,40 L100,0 L0,0 L0,40")
+                lblViewerInfoPanel.Margin = New Thickness(0, -2, 0, 0)
+                lblTimeInfoPanel.Margin = New Thickness(0, 0, 0, 10)
             Else
                 Canvas.SetTop(InfoPanel, y + 10)
+                InfoPanel.Clip = Geometry.Parse("M0,10 L40,10 L50,0 L60,10 L100,10 L100,50 L0,50 L0,0")
+                lblViewerInfoPanel.Margin = New Thickness(0, 5, 0, 0)
+                lblTimeInfoPanel.Margin = New Thickness(0)
             End If
 
             Dim vhs As ViewerHistoryStop = graph.getViewerHistoryStopByX(x)
@@ -532,7 +545,7 @@ Class MainWindow
 
     End Sub
 
-    Private Sub spEllipse_MouseDown(sender As Object, e As MouseButtonEventArgs) Handles spEllipse.MouseDown
+    Private Async Sub spEllipse_MouseDown(sender As Object, e As MouseButtonEventArgs) Handles spEllipse.MouseDown
 
         Dim ellipseFillBrush As RadialGradientBrush
 
@@ -548,7 +561,7 @@ Class MainWindow
         Else
 
             If Not spamProtector.isInitialized Then
-                loadPhrasesHelperSub()
+                Await loadPhrasesHelperSub()
             Else
 
                 spamProtector.isActive = True
@@ -564,18 +577,37 @@ Class MainWindow
 
     End Sub
 
-    'Private Sub increaseChatSize() Handles btnChatBigger.Click
-    '    chatSize += 4.0
-    '    applyChatSize()
-    'End Sub
+    Private Sub increaseChatSize() Handles btnChatBigger.Click
+        chatSize += 2
+        applyChatSize()
+    End Sub
 
-    'Private Sub decreaseChatSize() Handles btnChatSmaller.Click
-    '    chatSize -= 4.0
-    '    applyChatSize()
-    'End Sub
+    Private Sub decreaseChatSize() Handles btnChatSmaller.Click
+        If chatSize > 2 Then chatSize -= 2
+        applyChatSize()
+    End Sub
 
-    'Private Sub applyChatSize()
-    '    eventList.ItemContainerStyle.Setters.Add(New Setter(HeightProperty, chatSize))
-    'End Sub
+    Private Sub applyChatSize()
+        eventList.FontSize = chatSize
+    End Sub
 
+    Private Sub arcFollower_MouseEnter(sender As Object, e As MouseEventArgs) _
+        Handles arcFollower.MouseEnter
+        If Not IsNothing(fnfg) Then fnfg.MouseEnter(followerNonfollowerGraph.mouseEnterObject.FOLLOWER)
+    End Sub
+
+    Private Sub arcNonfollower_MouseEnter(sender As Object, e As MouseEventArgs) _
+        Handles arcNonfollower.MouseEnter
+        If Not IsNothing(fnfg) Then fnfg.MouseEnter(followerNonfollowerGraph.mouseEnterObject.NONFOLLOWER)
+    End Sub
+
+    Private Sub arcUnknown_MouseEnter(sender As Object, e As MouseEventArgs) _
+        Handles arcUnknown.MouseEnter
+        If Not IsNothing(fnfg) Then fnfg.MouseEnter(followerNonfollowerGraph.mouseEnterObject.UNKNOWN)
+    End Sub
+
+    Private Sub arc_Leave(sender As Object, e As EventArgs) _
+        Handles arcFollower.MouseLeave, arcNonfollower.MouseLeave, arcUnknown.MouseLeave
+        If Not IsNothing(fnfg) Then fnfg.MouseLeave()
+    End Sub
 End Class

@@ -13,7 +13,14 @@ Public Class SpamProtector
     Public Async Function loadPhrases() As Task
 
         Dim wc As New WebClient
-        Dim phraseData As String = Await wc.DownloadStringTaskAsync(New Uri("http://newcat.bplaced.net/tvd/spamPhrases.txt"))
+        Dim phraseData As String
+
+        Try
+            phraseData = Await wc.DownloadStringTaskAsync(New Uri("http://newcat.bplaced.net/tvd/spamPhrases.txt"))
+        Catch e As WebException
+            MsgBox("Failed to initialize the SpamProtector. It will stay inactive for this session.")
+            Return
+        End Try
 
         If IsNothing(phraseData) OrElse phraseData = "" OrElse (phraseData.Contains("404") AndAlso phraseData.Contains("bplaced.net")) Then Return
 
@@ -34,7 +41,7 @@ Public Class SpamProtector
     ''' <remarks></remarks>
     Public Function checkMsg(ByVal msg As String) As Boolean
 
-        If Not isActive Then Return False
+        If Not isInitialized OrElse Not isActive Then Return False
 
         Dim isSpam As Boolean = False
 
