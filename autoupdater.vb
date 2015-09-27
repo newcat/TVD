@@ -2,6 +2,7 @@
 Option Explicit On
 
 Imports System.Net.Http
+Imports System.IO
 
 Public Class autoupdater
 
@@ -9,8 +10,8 @@ Public Class autoupdater
 
     Public Async Sub check()
 
-        If My.Computer.FileSystem.FileExists(cDir + "\updater.exe") Then
-            My.Computer.FileSystem.DeleteFile(cDir + "\updater.exe")
+        If File.Exists(cDir + "\updater.exe") Then
+            File.Delete(cDir + "\updater.exe")
         End If
 
         Dim localVersion As String = GetType(Application).Assembly.GetName().Version.ToString()
