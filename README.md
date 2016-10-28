@@ -1,4 +1,7 @@
-# TVD
+# TVD (DEPRECATED)
+
+### NEW VERSION HERE: https://github.com/newcat/TVDC
+
 Twitch Viewer Display
 
 More info can be found here (German):
